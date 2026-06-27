@@ -1,7 +1,22 @@
 <?php
-// Incluimos la lógica del patrón Strategy (Tu backend)
+// Incluimos la lógica del patrón Strategy (backend)
 require_once 'Estrategias.php';
 require_once 'Notificador.php';
+require_once 'GestorGimnasio.php'; 
+
+// --- Lógica del Patrón Singleton (Simulación) ---
+// Ambos módulos (recepción y entrenador) usarán esta misma y única instancia
+$gestorUnico = GestorGimnasio::getInstance();
+
+if (isset($_POST['registrar_socio']) && !empty($_POST['nombre_socio'])) {
+    $gestorUnico->registrarSocio($_POST['nombre_socio']);
+    
+    // Redirigimos a la misma página para limpiar el POST y evitar duplicados al recargar
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit; 
+}
+
+// ------------------------------------------------
 
 // --- Lógica del Patrón Observer (Simulación) ---
 $gym = new GimnasioNotificador();
@@ -257,31 +272,71 @@ if (isset($_GET['objetivo'])) {
             </div>
         </div>
     </section>
-
-    <script>
-        function clearNotif(id) {
-            const container = document.getElementById(id);
-            container.innerHTML = '<p class="text-xs text-slate-400 italic">Esperando novedades...</p>';
-            container.classList.add('bg-slate-50');
-        }
-
-        function unsubscribe(userId) {
-            const status = document.getElementById('status-' + userId);
-            const container = document.getElementById('notif-' + userId);
-            const card = document.getElementById('card-' + userId);
+ <!-- SECCIÓN PATRÓN SINGLETON -->
+   <section class="max-w-5xl mx-auto mt-12 px-4 mb-20">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-32 h-32 bg-blue-50 rounded-full -ml-16 -mt-16 opacity-50"></div>
             
-            status.innerText = 'No Suscrito';
-            status.classList.remove('text-emerald-500');
-            status.classList.add('text-slate-400');
-            
-            container.innerHTML = '<p class="text-[10px] text-red-300 uppercase font-bold tracking-widest italic">Desconectado</p>';
-            card.classList.add('opacity-60', 'grayscale-[0.5]');
-            
-            // Aquí en un sistema real enviaríamos una petición AJAX para eliminar del Sujeto
-            console.log("Observer eliminado del Sujeto dinámicamente");
-        }
-    </script>
+            <div class="flex items-center gap-4 mb-8 relative z-10">
+                <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-200">
+                    <i class="fa-solid fa-database text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight">Gestión de Socios</h3>
+                    <p class="text-slate-500 font-medium">Instancia única compartida entre Recepción y Entrenadores</p>
+                </div>
+            </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-desktop text-blue-600"></i>
+                        Panel de Recepción
+                    </h4>
+                    <form method="POST" class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Dar de alta nuevo socio</label>
+                            <input type="text" name="nombre_socio" placeholder="Ej: Juan Pérez" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm">
+                        </div>
+                        <button type="submit" name="registrar_socio" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-200 active:scale-95">
+                            Registrar Socio
+                        </button>
+                    </form>
+                </div>
 
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-user text-blue-600"></i>
+                        Panel del Entrenador
+                    </h4>
+                    
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 min-h-[140px]">
+                        <?php
+                        // Obtenemos los socios de la instancia Singleton
+                        $socios = $gestorUnico->obtenerSocios();
+                        
+                        if (empty($socios)): ?>
+                            <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                                <i class="fa-solid fa-users-slash text-2xl mb-2 opacity-50"></i>
+                                <p class="text-xs italic">No hay socios registrados aún.</p>
+                            </div>
+                        <?php else: ?>
+                            <ul class="space-y-2">
+                                <?php foreach ($socios as $s): ?>
+                                    <li class="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-100 shadow-sm text-sm font-medium text-slate-700">
+                                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        <?php echo htmlspecialchars($s); ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    
 </body>
 </html>

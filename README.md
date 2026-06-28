@@ -8,7 +8,7 @@ Trabajo práctico final de la materia, basado en un sistema de gestión de gimna
 |---|---|---|
 | **Observer** | Comportamiento | Notifica promociones, cambios de horario y eventos a los usuarios suscritos al sitio, sin acoplar el gimnasio a cada usuario concreto. |
 | **Strategy** | Comportamiento | Genera rutinas de entrenamiento (fuerza, cardio, pérdida de peso) intercambiando el algoritmo según el objetivo del usuario, sin usar `if/else` en cascada. |
-| **Singleton** | Creacional | Garantiza una única instancia de `GestorGimnasio` como fuente de verdad para socios, clases, turnos y pagos. |
+| **Singleton** | Creacional | Garantiza una única instancia de `GestorGimnasio` como fuente de verdad para socios, clases, turnos, pagos y profeor acargo de esa clase. |
 | **Factory Method** | Creacional | Delega en subclases (`CreadorRutinaFuerza`, `CreadorRutinaCardio`, etc.) la creación del tipo de rutina concreto, evitando instanciar clases concretas directamente. |
 
 

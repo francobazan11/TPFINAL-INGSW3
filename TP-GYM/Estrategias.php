@@ -15,7 +15,7 @@ interface IRutinaStrategy {
 // ==========================================
 class RutinaFuerza implements IRutinaStrategy, IRutina {
     public function generarRutina() {
-        return "🏋️‍♂️ Rutina de Fuerza: 4 series de 8-10 repeticiones (Pesos libres).";
+        return " Rutina de Fuerza: 4 series de 8-10 repeticiones (Pesos libres).";
     }
 
     public function ejecutar() {
@@ -25,7 +25,7 @@ class RutinaFuerza implements IRutinaStrategy, IRutina {
 
 class RutinaCardio implements IRutinaStrategy, IRutina {
     public function generarRutina() {
-        return "🏃‍♂️ Rutina de Cardio: 45 min en cinta (HIIT) + 15 min de remo.";
+        return " Rutina de Cardio: 45 min en cinta (HIIT) + 15 min de remo.";
     }
 
     public function ejecutar() {
@@ -35,7 +35,7 @@ class RutinaCardio implements IRutinaStrategy, IRutina {
 
 class RutinaPerdidaPeso implements IRutinaStrategy, IRutina {
     public function generarRutina() {
-        return "🔥 Rutina Pérdida de Peso: Circuito funcional + 30 min bicicleta.";
+        return " Rutina Pérdida de Peso: Circuito funcional + 30 min bicicleta.";
     }
 
     public function ejecutar() {

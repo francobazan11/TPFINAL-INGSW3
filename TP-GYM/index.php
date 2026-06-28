@@ -14,9 +14,9 @@ if (isset($_POST['registrar_socio']) && !empty($_POST['nombre_socio'])) {
     exit; 
 }
 
-// Procesar nuevo turno (Ahora validamos que vengan socio y clase)
-if (isset($_POST['reservar_turno']) && !empty($_POST['nombre_turno']) && !empty($_POST['socio_turno'])) {
-    $gestorUnico->reservarTurno($_POST['socio_turno'], $_POST['nombre_turno']);
+// Procesar nuevo turno (Ahora validamos que vengan socio, clase y profesor)
+if (isset($_POST['reservar_turno']) && !empty($_POST['nombre_turno']) && !empty($_POST['socio_turno']) && !empty($_POST['profesor_turno'])) {
+    $gestorUnico->reservarTurno($_POST['socio_turno'], $_POST['nombre_turno'], $_POST['profesor_turno']);
     header("Location: " . $_SERVER['PHP_SELF']);
     exit; 
 }
@@ -462,7 +462,7 @@ if (isset($_POST['generar_plan_factory'])) {
                     <hr class="border-slate-200 mb-6">
 
                     <form method="POST" class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-3 gap-3">
                             <div>
                                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Socio</label>
                                 <select name="socio_turno" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm" <?php echo empty($gestorUnico->obtenerSocios()) ? 'disabled' : ''; ?>>
@@ -487,6 +487,14 @@ if (isset($_POST['generar_plan_factory'])) {
                                     <option value="Yoga - 20:00hs">Yoga 20hs</option>
                                 </select>
                             </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Profesor</label>
+                                <select name="profesor_turno" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm" <?php echo empty($gestorUnico->obtenerSocios()) ? 'disabled' : ''; ?>>
+                                   <option value="Marcos">Marcos</option>
+                                   <option value="Ana">Ana</option>
+                                   <option value="Carlos">Carlos</option>
+                                </select>
+                           </div>
                         </div>
                         <button type="submit" name="reservar_turno" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl hover:bg-blue-700 transition-all transform hover:-translate-y-1 shadow-md shadow-blue-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" <?php echo empty($gestorUnico->obtenerSocios()) ? 'disabled' : ''; ?>>
                             Confirmar Reserva

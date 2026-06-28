@@ -36,13 +36,11 @@ class GestorGimnasio {
         return $this->socios;
     }
 
-    // AHORA RECIBE EL SOCIO Y LA CLASE
-    public function reservarTurno($socio, $clase) {
-        // Guardamos el registro completo
-        $this->turnos[] = "<b>" . $socio . "</b> reservó " . $clase;
+    public function reservarTurno($socio, $clase, $profesor) {
+    // Guardamos el registro completo sumando al profe
+        $this->turnos[] = "<b>" . $socio . "</b> reservó " . $clase . " (Profe: <b>" . $profesor . "</b>)";
         $_SESSION['lista_turnos'] = $this->turnos;
     }
-    
     public function obtenerTurnos() {
         return $this->turnos;
     }

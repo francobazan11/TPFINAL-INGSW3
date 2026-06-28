@@ -25,7 +25,7 @@ abstract class CreadorRutina {
     public function generarPlan() {
         $rutina = $this->crearRutina();
         $resultado = $rutina->ejecutar();
-        return "📋 Plan de entrenamiento generado: " . $resultado;
+        return " Plan de entrenamiento generado: " . $resultado;
     }
 }
 

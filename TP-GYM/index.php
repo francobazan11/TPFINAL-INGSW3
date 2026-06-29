@@ -173,16 +173,16 @@ if (isset($_POST['generar_plan_factory'])) {
         </div>
         <?php endif; ?>
         
-        <a href="?objetivo=fuerza#clases" class="block w-full bg-[#2563eb] text-white p-8 rounded-xl shadow-md cursor-pointer hover:bg-blue-700 transition mb-4">
-            <i class="fa-solid fa-dumbbell text-2xl mb-4 text-blue-200"></i>
-            <h4 class="text-xl font-bold mb-1">Musculación</h4>
-            <p class="text-blue-100 text-sm">Fuerza y definición con equipamiento premium.</p>
-        </a>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             
+            <a href="?objetivo=fuerza#clases" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                <i class="fa-solid fa-dumbbell text-[#2563eb] text-xl mb-3"></i>
+                <h4 class="text-base font-bold text-gray-900 mb-1">Musculación</h4>
+                <p class="text-gray-500 text-sm">Fuerza y definición con equipamiento premium.</p>
+            </a>
+
             <a href="?objetivo=peso#clases" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
-                <i class="fa-solid fa-child-reaching text-[#2563eb] text-xl mb-3"></i>
+                <i class="fa-solid fa-dumbbell text-[#2563eb] text-xl mb-3"></i>
                 <h4 class="text-base font-bold text-gray-900 mb-1">CrossFit</h4>
                 <p class="text-gray-500 text-sm">Intensidad pura para resultados reales.</p>
             </a>
@@ -203,6 +203,12 @@ if (isset($_POST['generar_plan_factory'])) {
                 <i class="fa-solid fa-spa text-[#2563eb] text-xl mb-3"></i>
                 <h4 class="text-base font-bold text-gray-900 mb-1">Yoga</h4>
                 <p class="text-gray-500 text-sm">Flexibilidad y paz mental para tu día.</p>
+            </a>
+
+            <a href="?objetivo=cardio#clases" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                <i class="fa-solid fa-person-hiking text-[#2563eb] text-xl mb-3"></i>
+                <h4 class="text-base font-bold text-gray-900 mb-1">Trekking</h4>
+                <p class="text-gray-500 text-sm">Resistencia y caminatas al aire libre.</p>
             </a>
 
         </div>
@@ -264,7 +270,7 @@ if (isset($_POST['generar_plan_factory'])) {
                                         <span id="status-user1" class="block text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">Suscrito</span>
                                     </div>
                                 </div>
-                                <button onclick="unsubscribe('user1')" class="text-[10px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded-md transition-colors font-bold uppercase">
+                                <button id="btn-user1" onclick="toggleSubscription('user1')" class="text-[10px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded-md transition-colors font-bold uppercase">
                                     Desuscribir
                                 </button>
                             </div>
@@ -292,7 +298,7 @@ if (isset($_POST['generar_plan_factory'])) {
                                         <span id="status-user2" class="block text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">Suscrito</span>
                                     </div>
                                 </div>
-                                <button onclick="unsubscribe('user2')" class="text-[10px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded-md transition-colors font-bold uppercase">
+                                <button id="btn-user2" onclick="toggleSubscription('user2')" class="text-[10px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded-md transition-colors font-bold uppercase">
                                     Desuscribir
                                 </button>
                             </div>
@@ -516,5 +522,80 @@ if (isset($_POST['generar_plan_factory'])) {
         </div>
     </section>
     
+    <script>
+        function clearNotif(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = '<p class="text-xs text-slate-400 italic">Esperando novedades...</p>';
+            }
+        }
+
+        function toggleSubscription(userId) {
+            const statusEl = document.getElementById('status-' + userId);
+            const btnEl = document.getElementById('btn-' + userId);
+            const notifEl = document.getElementById('notif-' + userId);
+            
+            if (!statusEl || !btnEl) return;
+            
+            const isSubscribed = localStorage.getItem(userId + '_subscribed') !== 'false';
+            
+            if (isSubscribed) {
+                // Unsubscribe
+                localStorage.setItem(userId + '_subscribed', 'false');
+                
+                statusEl.textContent = 'Desuscrito';
+                statusEl.className = 'block text-[10px] text-red-500 font-bold uppercase tracking-tighter';
+                
+                btnEl.textContent = 'Suscribir';
+                btnEl.className = 'text-[10px] bg-emerald-100 text-emerald-600 hover:bg-emerald-200 hover:text-emerald-700 px-2 py-1 rounded-md transition-colors font-bold uppercase';
+                
+                if (notifEl) {
+                    notifEl.innerHTML = '<p class="text-xs text-slate-400 italic">Desuscrito - No recibe notificaciones</p>';
+                }
+            } else {
+                // Subscribe
+                localStorage.setItem(userId + '_subscribed', 'true');
+                
+                statusEl.textContent = 'Suscrito';
+                statusEl.className = 'block text-[10px] text-emerald-500 font-bold uppercase tracking-tighter';
+                
+                btnEl.textContent = 'Desuscribir';
+                btnEl.className = 'text-[10px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded-md transition-colors font-bold uppercase';
+                
+                if (notifEl) {
+                    notifEl.innerHTML = '<p class="text-xs text-slate-400 italic">Esperando novedades...</p>';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ['user1', 'user2'].forEach(userId => {
+                const isSubscribed = localStorage.getItem(userId + '_subscribed') !== 'false';
+                const statusEl = document.getElementById('status-' + userId);
+                const btnEl = document.getElementById('btn-' + userId);
+                const notifEl = document.getElementById('notif-' + userId);
+                
+                if (statusEl && btnEl) {
+                    if (!isSubscribed) {
+                        statusEl.textContent = 'Desuscrito';
+                        statusEl.className = 'block text-[10px] text-red-500 font-bold uppercase tracking-tighter';
+                        
+                        btnEl.textContent = 'Suscribir';
+                        btnEl.className = 'text-[10px] bg-emerald-100 text-emerald-600 hover:bg-emerald-200 hover:text-emerald-700 px-2 py-1 rounded-md transition-colors font-bold uppercase';
+                        
+                        if (notifEl) {
+                            notifEl.innerHTML = '<p class="text-xs text-slate-400 italic">Desuscrito - No recibe notificaciones</p>';
+                        }
+                    } else {
+                        statusEl.textContent = 'Suscrito';
+                        statusEl.className = 'block text-[10px] text-emerald-500 font-bold uppercase tracking-tighter';
+                        
+                        btnEl.textContent = 'Desuscribir';
+                        btnEl.className = 'text-[10px] bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded-md transition-colors font-bold uppercase';
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

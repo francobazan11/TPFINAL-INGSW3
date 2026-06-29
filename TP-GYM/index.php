@@ -1,5 +1,8 @@
 <?php
-// Incluimos la lógica del patrón Strategy (backend)
+// ¡Importante! Iniciamos la sesión para poder guardar los planes generados
+session_start();
+
+// Incluimos la lógica de los patrones (backend)
 require_once 'Estrategias.php';
 require_once 'Notificador.php';
 require_once 'GestorGimnasio.php'; 
@@ -47,7 +50,7 @@ if (isset($_POST['enviar_notificacion'])) {
 }
 
 
-// Creamos al usuario
+// Creamos al usuario para el patrón Strategy
 $clienteGym = new Usuario("Marcos");
 $resultadoRutina = null;
 
@@ -67,28 +70,37 @@ if (isset($_GET['objetivo'])) {
 }
 
 // --- Lógica del Patrón Factory Method ---
+// 1. Inicializamos la lista de planes en la sesión si no existe
+if (!isset($_SESSION['lista_planes'])) {
+    $_SESSION['lista_planes'] = [];
+}
+
 $planGenerado = null;
-$creadorUsado = null;
-$productoCreado = null;
 if (isset($_POST['generar_plan_factory'])) {
     $tipoPlan = $_POST['tipo_plan'] ?? '';
-    
     if ($tipoPlan == 'fuerza') {
         $creador = new CreadorRutinaFuerza();
-        $creadorUsado = 'CreadorRutinaFuerza';
-        $productoCreado = 'RutinaFuerza';
+        $icono = '🏋️‍♂️';
+        $nombrePlan = 'Musculación (Fuerza)';
     } elseif ($tipoPlan == 'cardio') {
         $creador = new CreadorRutinaCardio();
-        $creadorUsado = 'CreadorRutinaCardio';
-        $productoCreado = 'RutinaCardio';
+        $icono = '🏃‍♂️';
+        $nombrePlan = 'HIIT / Spinning (Cardio)';
     } elseif ($tipoPlan == 'peso') {
         $creador = new CreadorRutinaPerdidaPeso();
-        $creadorUsado = 'CreadorRutinaPerdidaPeso';
-        $productoCreado = 'RutinaPerdidaPeso';
+        $icono = '🔥';
+        $nombrePlan = 'Pérdida de Peso';
     }
     
     if (isset($creador)) {
         $planGenerado = $creador->generarPlan();
+        
+        // 2. Guardamos el plan recién creado en la sesión para que aparezca en la lista
+        $_SESSION['lista_planes'][] = [
+            'icono' => $icono,
+            'nombre' => $nombrePlan,
+            'detalle' => $planGenerado
+        ];
     }
 }
 ?>
@@ -314,16 +326,54 @@ if (isset($_POST['generar_plan_factory'])) {
                 </div>
                 <div>
                     <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight">Generación de Planes</h3>
-                    <p class="text-slate-500 font-medium">Patrón Factory Method - Delegación creacional en subclases</p>
+                    <p class="text-slate-500 font-medium">Planes de entrenamiento generados por el sistema</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-                <!-- PANEL DE CONTROL (CLIENTE / CREADOR) -->
-                <div class="md:col-span-1 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                
+                <div class="md:col-span-2 space-y-4">
+                    <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-indigo-600"></i>
+                        Planes Creados Recientemente
+                    </h4>
+                    
+                    <?php if (isset($planGenerado) && $planGenerado): ?>
+                    <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg mb-4 text-emerald-800 shadow-sm animate-fade-in-down">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span class="font-bold text-sm">¡Plan creado exitosamente!</span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="grid grid-cols-1 gap-4 overflow-y-auto max-h-[300px] pr-2">
+                        <?php 
+                        if (empty($_SESSION['lista_planes'])) {
+                            echo '<div class="text-center p-8 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-medium text-sm">No hay planes creados aún. Utilizá el panel de la derecha para generar uno.</div>';
+                        } else {
+                            // Invertimos el array para que el último creado salga primero arriba
+                            $planesInvertidos = array_reverse($_SESSION['lista_planes']);
+                            foreach ($planesInvertidos as $plan) {
+                                ?>
+                                <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex items-start gap-4 hover:shadow-md transition">
+                                    <div class="text-3xl bg-slate-50 p-3 rounded-lg border border-slate-100"><?php echo $plan['icono']; ?></div>
+                                    <div class="flex-1">
+                                        <h5 class="font-bold text-slate-800 text-sm"><?php echo $plan['nombre']; ?></h5>
+                                        <p class="text-slate-600 text-xs mt-2 font-mono bg-indigo-50 p-2.5 rounded-lg border border-indigo-100/50"><?php echo htmlspecialchars($plan['detalle']); ?></p>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
+
+                <div class="md:col-span-1 bg-slate-50 p-6 rounded-2xl border border-slate-200 h-fit">
                     <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-gears text-indigo-600"></i>
-                        Creadores de Planes
+                        Nuevo Plan
                     </h4>
                     <form method="POST" class="space-y-4">
                         <div>
@@ -331,96 +381,13 @@ if (isset($_POST['generar_plan_factory'])) {
                             <select name="tipo_plan" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm">
                                 <option value="fuerza" <?php echo (isset($_POST['tipo_plan']) && $_POST['tipo_plan'] == 'fuerza') ? 'selected' : ''; ?>>🏋️‍♂️ Musculación (Fuerza)</option>
                                 <option value="cardio" <?php echo (isset($_POST['tipo_plan']) && $_POST['tipo_plan'] == 'cardio') ? 'selected' : ''; ?>>🏃‍♂️ HIIT / Spinning (Cardio)</option>
-                                <option value="peso" <?php echo (isset($_POST['tipo_plan']) && $_POST['tipo_plan'] == 'peso') ? 'selected' : ''; ?>>🔥 Funcional / CrossFit (Pérdida de Peso)</option>
+                                <option value="peso" <?php echo (isset($_POST['tipo_plan']) && $_POST['tipo_plan'] == 'peso') ? 'selected' : ''; ?>>🔥 Funcional / CrossFit</option>
                             </select>
                         </div>
-
-                        <button type="submit" name="generar_plan_factory" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition-all transform hover:-translate-y-1 shadow-lg shadow-indigo-200 active:scale-95">
-                            Generar Plan (Factory)
+                        <button type="submit" name="generar_plan_factory" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all transform hover:-translate-y-1 shadow-lg shadow-indigo-200 active:scale-95">
+                            Generar Plan
                         </button>
                     </form>
-                </div>
-
-                <!-- VISTA DETALLADA DEL PLAN Y TRAZABILIDAD -->
-                <div class="md:col-span-2 space-y-4">
-                    <?php if ($planGenerado): ?>
-                        <div class="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-lg font-mono">
-                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                </div>
-                                <span class="text-xs text-slate-500 font-sans">factory_method_output.log</span>
-                            </div>
-                            <p class="text-emerald-400 text-sm leading-relaxed">
-                                <?php echo htmlspecialchars($planGenerado); ?>
-                            </p>
-                        </div>
-
-                        <div class="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl">
-                            <h5 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <i class="fa-solid fa-code-branch"></i>
-                                Trazabilidad de Creación (Factory Method)
-                            </h5>
-                            <ol class="relative border-l border-indigo-200 ml-3 space-y-4">
-                                <li class="ml-6">
-                                    <span class="absolute flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full -left-3 ring-8 ring-white">
-                                        <span class="text-[10px] font-bold text-indigo-700">1</span>
-                                    </span>
-                                    <p class="text-xs text-slate-600">
-                                        Se instancia el Creador Concreto solicitado: 
-                                        <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[11px] font-mono text-indigo-600 font-bold">new <?php echo $creadorUsado; ?>()</code>
-                                    </p>
-                                </li>
-                                <li class="ml-6">
-                                    <span class="absolute flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full -left-3 ring-8 ring-white">
-                                        <span class="text-[10px] font-bold text-indigo-700">2</span>
-                                    </span>
-                                    <p class="text-xs text-slate-600">
-                                        El cliente llama a 
-                                        <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[11px] font-mono text-indigo-600 font-bold">$creador->generarPlan()</code>
-                                    </p>
-                                </li>
-                                <li class="ml-6">
-                                    <span class="absolute flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full -left-3 ring-8 ring-white">
-                                        <span class="text-[10px] font-bold text-indigo-700">3</span>
-                                    </span>
-                                    <p class="text-xs text-slate-600">
-                                        Dentro de <code class="text-[11px] font-mono font-bold text-indigo-600">generarPlan()</code>, se invoca al método de fábrica abstracto 
-                                        <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[11px] font-mono text-indigo-600 font-bold">$this->crearRutina()</code>
-                                    </p>
-                                </li>
-                                <li class="ml-6">
-                                    <span class="absolute flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full -left-3 ring-8 ring-white">
-                                        <span class="text-[10px] font-bold text-indigo-700">4</span>
-                                    </span>
-                                    <p class="text-xs text-slate-600">
-                                        El creador concreto sobrescribe el método y devuelve un nuevo **ConcreteProduct**: 
-                                        <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[11px] font-mono text-indigo-600 font-bold">new <?php echo $productoCreado; ?>()</code> (que implementa <code class="text-[11px] font-mono font-bold text-indigo-600">IRutina</code>)
-                                    </p>
-                                </li>
-                                <li class="ml-6">
-                                    <span class="absolute flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full -left-3 ring-8 ring-white">
-                                        <span class="text-[10px] font-bold text-indigo-700">5</span>
-                                    </span>
-                                    <p class="text-xs text-slate-600">
-                                        El creador ejecuta 
-                                        <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[11px] font-mono text-indigo-600 font-bold">$rutina->ejecutar()</code> 
-                                        sobre la interfaz sin acoplarse a la clase del producto concreto.
-                                    </p>
-                                </li>
-                            </ol>
-                        </div>
-                    <?php else: ?>
-                        <div class="h-full min-h-[220px] flex flex-col items-center justify-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-8 text-center">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
-                                <i class="fa-solid fa-industry text-xl animate-pulse"></i>
-                            </div>
-                            <h5 class="font-bold text-slate-700 text-sm mb-1">Esperando Generación de Plan</h5>
-                            <p class="text-xs text-slate-400 max-w-sm">Selecciona un objetivo a la izquierda y presiona "Generar Plan" para ver cómo el patrón Factory Method delega la creación en sus subclases.</p>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
